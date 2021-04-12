@@ -1,18 +1,13 @@
 import { useEffect, useState } from "react";
+import { Action } from "redux";
 
 
-export function getAuthCookie() {
-  const cookie: string | null = window.localStorage.getItem("_qb_auth");
-  return cookie;
+export interface PayloadAction<T, R = never> extends Action<T> {
+  payload: R;
 }
 
 
-export function setAuthCookie(authInfo: string) {
-  window.localStorage.setItem("_qb_auth", authInfo);
-}
-
-
-export function useInterval<T>(pre: number, func: () => T | Promise<T>, init: T): [T, number] {
+export function useInterval<T>(interval: number, func: () => T | Promise<T>, init: T): [T, number] {
   const [data, setData] = useState<[T, number]>([init, 0]);
 
   useEffect(() => {
@@ -20,9 +15,16 @@ export function useInterval<T>(pre: number, func: () => T | Promise<T>, init: T)
     const lid = setInterval(async () => {
       const res = await func();
       setData([res, Date.now()]);
-    }, pre * 1000);
+    }, interval);
     return () => clearInterval(lid);
-  }, [func, ]);
+  }, [func,]);
 
   return data;
+}
+
+
+export function fromEntries<V>(params: Iterable<[string, V]>): { [key: string] : V } {
+  let buffer: { [key: string] : V } = {};
+  for (let [k, v] of params) buffer[k] = v;
+  return buffer;
 }

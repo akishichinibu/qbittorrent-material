@@ -1,16 +1,13 @@
-import React, { FC } from "react"
+import React, { Dispatch, FC, useCallback } from "react"
 import { Box, Collapse, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@material-ui/core"
-import { TrackerInfo, trackersList } from "../api/task";
-import { useInterval } from "../utils";
+import { QBTrackerInfo } from "@src/common/task";
+import { trackersList } from "@src/api/task";
+import { TrackersUpdatedAT } from "./redux/action";
+import { useInterval } from "@src/utils";
+import { useDispatch } from "react-redux";
 
 
-interface PropsType {
-  hash: string;
-  open: boolean;
-}
-
-
-const tableFieldMapping: Map<string, keyof TrackerInfo> = new Map([
+const tableFieldMapping: Map<string, keyof QBTrackerInfo> = new Map([
   ["url", "url"],
   ["status", "status"],
   ["tier", "tier"],
@@ -21,12 +18,22 @@ const tableFieldMapping: Map<string, keyof TrackerInfo> = new Map([
 ]);
 
 
-export const TrackerList: FC<PropsType> = ({ hash, open }) => {
-  const fetchTrackerList = async () => {
-    return open ? (await trackersList(hash)).trackerList : [];
-  };
+interface PropsType {
+  hash: string;
+  open: boolean;
+}
 
-  const [trackerInfo, lastExecuted] = useInterval<TrackerInfo[]>(1, fetchTrackerList, []);
+
+const TrackerList: FC<PropsType> = ({ hash, open }) => {
+  const dispatch = useDispatch<Dispatch<TrackersUpdatedAT>>();
+
+  const hanlder = useCallback(async () => {
+    const { trackers } = await trackersList(hash);
+    dispatch({ type: "task/trackers/updated", payload: { hash, trackers } });
+    return trackers;
+  }, [hash, ]);
+  
+  const [trackers, lastExecuted] = useInterval(3000, hanlder, []);
 
   return <>
     <Collapse in={open} timeout="auto" unmountOnExit>
@@ -39,7 +46,7 @@ export const TrackerList: FC<PropsType> = ({ hash, open }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {trackerInfo.map((r) => {
+            {trackers.map((r) => {
               return <>
                 <TableRow key={r.url}>
                   {Array.from(tableFieldMapping.values()).map(k => <TableCell align="right">{r[k]}</TableCell>)}
@@ -52,3 +59,6 @@ export const TrackerList: FC<PropsType> = ({ hash, open }) => {
     </Collapse>
   </>
 }
+
+
+export default TrackerList;

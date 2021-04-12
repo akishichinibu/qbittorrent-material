@@ -1,3 +1,9 @@
+import { StatusCodes } from "http-status-codes";
+
+class RequestError extends Error {
+
+}
+
 
 async function postRequest(version: string, endpoint: string, body: string) {
   const headers = new Headers();
@@ -11,7 +17,14 @@ async function postRequest(version: string, endpoint: string, body: string) {
     body: body === null ? undefined : body,
   });
   
-  const res = await fetch(req);
+  let res: Response;
+
+  try {
+    res = await fetch(req);
+  } catch (e) {
+    throw new RequestError(e);
+  }
+
   return res;
 }
 
@@ -19,15 +32,22 @@ async function postRequest(version: string, endpoint: string, body: string) {
 async function getRequest(version: string, endpoint: string) {
   const headers = new Headers();
   headers.append("Content-Type", "application/x-www-form-urlencoded");
-
+  
   const req = new Request(`/api/${version}${endpoint}`, {
     method: "GET",
     mode: "same-origin",
     headers: headers,
     credentials: "same-origin",
   });
-  
-  const res = await fetch(req);
+
+  let res: Response;
+
+  try {
+    res = await fetch(req);
+  } catch (e) {
+    throw new RequestError(e);
+  }
+
   return res;
 }
 
@@ -36,8 +56,7 @@ export function checkHasAuth() {
   const xhr = new XMLHttpRequest();
   xhr.open("GET", "/api/v2/app/version", false);
   xhr.send();
-  console.log(xhr.status);
-  return xhr.status === 200;
+  return xhr.status === StatusCodes.OK;
 }
 
 

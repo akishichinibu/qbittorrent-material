@@ -1,20 +1,19 @@
-import { v2GetRaw, v2PostRaw } from "./utils";
+import { StatusCodes } from "http-status-codes";
+import { v2GetRaw } from "./utils";
 
 export async function applicationVersion() {
   const { statusCode, data } = await v2GetRaw("/app/version");
 
   return {
-    statusCode: statusCode, 
-    version: statusCode === 200 ? data : null,
+    version: data,
   };
 }
 
 
-export async function APIVersion() {
+export async function apiVersion() {
   const { statusCode, data } = await v2GetRaw("/app/webapiVersion");
 
   return {
-    statusCode: statusCode, 
-    version: statusCode === 200 ? data : null,
+    version: data,
   };
 }

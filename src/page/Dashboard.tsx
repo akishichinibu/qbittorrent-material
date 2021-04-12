@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { Dispatch, FC, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import clsx from 'clsx';
+
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Drawer from '@material-ui/core/Drawer';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import IconButton from '@material-ui/core/IconButton';
@@ -13,21 +12,20 @@ import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 
-import { Menu as MenuIcon, ChevronLeft as ChevronLeftIcon } from '@material-ui/icons';
-
-import { Version } from '../component/Version';
-import { TaskList } from '../component/TaskList';
+import { TaskList } from '../task/TorrentList';
 import { mainListItems, secondaryListItems } from '../component/SideMenu';
+
+import { GlobalActionType, GlobalReduxState } from '@src/redux';
+import LoginModal from '@src/app/LoginModal';
+import AppBarHeader from '@src/page/AppHeader';
 
 
 const drawerWidth = 240;
 
+
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
-  },
-  toolbar: {
-    paddingRight: 24, // keep right padding when drawer closed
   },
   toolbarIcon: {
     display: 'flex',
@@ -102,42 +100,33 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function DashBoard() {
-  const classes = useStyles();
-  const [drawerOpen, setDrawerOpen] = useState(true);
 
-  const handleDrawerOpen = () => { setDrawerOpen(old => !old); };
+const DashBoard: FC = () => {
+  const { root, drawerPaper, drawerPaperClose, toolbarIcon, content, appBarSpacer, container } = useStyles();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const handleDrawerOpen = () => {
+    setDrawerOpen(old => !old);
+  };
+
+  const { task, hasLogin } = useSelector(({ task, app }: GlobalReduxState) => ({
+    hasLogin: app.hasLogin,
+    task,
+  }));
 
   return <>
-    <div className={classes.root}>
+    <div className={root}>
       <CssBaseline />
-
-      <AppBar position="absolute" className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}>
-        <Toolbar className={classes.toolbar}>
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            className={clsx(classes.menuButton, drawerOpen && classes.menuButtonHidden)}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
-            Dashboard
-          </Typography>
-          <Version />
-        </Toolbar>
-      </AppBar>
+      <AppBarHeader drawerOpen={drawerOpen} handleDrawerOpen={handleDrawerOpen} />
 
       <Drawer
         variant="permanent"
         classes={{
-          paper: clsx(classes.drawerPaper, !drawerOpen && classes.drawerPaperClose),
+          paper: clsx(drawerPaper, !drawerOpen && drawerPaperClose),
         }}
         open={drawerOpen}
       >
-        <div className={classes.toolbarIcon}>
+        <div className={toolbarIcon}>
           <IconButton onClick={handleDrawerOpen} />
         </div>
         <Divider />
@@ -146,18 +135,23 @@ export default function DashBoard() {
         <List>{secondaryListItems}</List>
       </Drawer>
 
-      <main className={classes.content}>
-        <div className={classes.appBarSpacer} />
-        <Container maxWidth="lg" className={classes.container}>
+      <main className={content}>
+        <div className={appBarSpacer} />
+        <Container maxWidth="lg" className={container}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={12} lg={12}>
               <Paper>
-                <TaskList></TaskList>
+                <TaskList task={task} />
               </Paper>
             </Grid>
           </Grid>
         </Container>
       </main>
     </div>
+
+    <LoginModal open={!hasLogin} />
   </>
 }
+
+
+export default DashBoard;

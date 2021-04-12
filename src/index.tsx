@@ -1,20 +1,37 @@
-import React, { FC, useState } from "react";
+import React, { Dispatch, FC, useCallback } from "react";
 import ReactDOM from "react-dom";
-import { checkHasAuth } from "./api/utils";
+import { Provider, useDispatch } from "react-redux";
+import { torrentsList } from "./api/task";
 
-import { LoginModal } from "./component/LoginModal";
 import DashBoard from "./page/Dashboard";
+import { GlobalActionType, globalStore } from "./redux";
+import { useInterval } from "./utils";
 
 
 const Main: FC = () => {
-  const [hasAuth, setHasAuth] = useState<boolean>(checkHasAuth());
+  const dispatch = useDispatch<Dispatch<GlobalActionType>>();
 
-  if (hasAuth) {
-    return <DashBoard></DashBoard>;
-  } else {
-    return <LoginModal open={hasAuth === false} onLoginSuccess={() => setHasAuth(true)}/>
-  }
+  const hanlder = useCallback(async () => {
+    const torrents = await torrentsList();
+    dispatch({ type: "task/torrents/updated", payload: { torrents } });
+    return torrents;
+  }, []);
+  
+  const [_, lastExecuted] = useInterval(3000, hanlder, []);
+
+  return <>
+    <DashBoard></DashBoard>
+  </>
 }
 
 
-ReactDOM.render(<Main />, document.getElementById("root"));
+const ReduxMain: FC = () => {
+  return <>
+    <Provider store={globalStore}>
+      <Main />
+    </Provider>
+  </>
+}
+
+
+ReactDOM.render(<ReduxMain />, document.getElementById("root"));

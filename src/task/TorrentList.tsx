@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react"
+import React, { Dispatch, FC, useCallback } from "react"
 import {
   Checkbox,
   createStyles,
@@ -15,10 +15,11 @@ import {
 } from "@material-ui/core"
 
 import { KeyboardArrowUp, KeyboardArrowDown } from '@material-ui/icons';
-
-import { TorrentInfo, torrentsList } from "@api/task";
-import { useInterval } from "../utils";
-import { TrackerList } from "./TrackerList";
+import { QBTorrentInfo, QBTrackerInfo } from "@src/common/task";
+import { useDispatch, useSelector } from "react-redux";
+import { TaskStateType } from "./redux/state";
+import { PresentTriggerAT, TaskGAT } from "./redux/action";
+import TrackerList from "./TrackerList";
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -44,12 +45,9 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 
-const fetchTaskList = async () => (await torrentsList()).taskList;
-
-
 interface HeadCell {
   disablePadding: boolean;
-  id: keyof TorrentInfo;
+  id: keyof QBTorrentInfo;
   label: string;
   numeric: boolean;
 }
@@ -66,7 +64,7 @@ const headCells: HeadCell[] = [
 
 interface CellInfo {
   label: string;
-  field: keyof TorrentInfo;
+  field: keyof QBTorrentInfo;
   numeric: boolean;
   disablePadding: boolean;
 }
@@ -110,8 +108,18 @@ interface EnhancedTableProps {
   rowCount: number;
 }
 
-function EnhancedTableHead(props: EnhancedTableProps) {
-  const { classes, orderBy, numSelected, rowCount } = props;
+
+const EnhancedTableHead: FC<EnhancedTableProps> = ({ classes, orderBy, numSelected, rowCount }) => {
+  const dispatch = useDispatch<Dispatch<PresentTriggerAT>>();
+
+  const onSelectAllClick = useCallback(() => {
+    dispatch({
+      type: "task/present/trigger", payload: {
+        hash: "",
+        operation: "toSelectAll",
+      }
+    })
+  }, []);
 
   return <>
     <TableHead>
@@ -120,7 +128,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           <Checkbox
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
-            // onChange={onSelectAllClick}
+            onChange={onSelectAllClick}
             inputProps={{ 'aria-label': 'select all desserts' }}
           />
         </TableCell>
@@ -154,28 +162,32 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 
-export const TaskList: FC = () => {
+export const TaskList: FC<{ task: TaskStateType; }> = ({ task: { torrents } }) => {
   const classes = useStyles();
-  const [taskList, lastExecuted] = useInterval<TorrentInfo[]>(1, fetchTaskList, []);
+  const dispatch = useDispatch<Dispatch<PresentTriggerAT>>();
 
-  const [selectedStatus, setSelectedStatus] = useState<Map<string, boolean>>(new Map());
-  const [openStatus, setOpenStatus] = useState<Map<string, boolean>>(new Map());
+  const handleCheckboxClick = useCallback((hash: string) => {
+    dispatch({
+      type: "task/present/trigger",
+      payload: {
+        operation: "selected",
+        hash,
+      }
+    });
+  }, []);
 
-  useEffect(() => {
-    setSelectedStatus(old => new Map(taskList.map(({ hash, }) => [hash, old.has(hash) ? old.get(hash)! : false])));
-  }, [taskList,]);
+  const handleCollapseClick = useCallback((hash: string) => {
+    dispatch({
+      type: "task/present/trigger",
+      payload: {
+        operation: "expanded",
+        hash,
+      }
+    });
+  }, []);
 
-  useEffect(() => {
-    setOpenStatus(old => new Map(taskList.map(({ hash, }) => [hash, old.has(hash) ? old.get(hash)! : false])));
-  }, [taskList,]);
-
-  const handleCheckboxClick = (hash: string) => {
-    setSelectedStatus(old => new Map(old.set(hash, !old.get(hash))));
-  }
-
-  const handleCollapseClick = (hash: string) => {
-    setOpenStatus(old => new Map(old.set(hash, !old.get(hash))));
-  }
+  const nTotal = Object.keys(torrents).length;
+  const nSelected = Object.entries(torrents).filter(([_, { pannel }]) => pannel.selected).length;
 
   return <>
     <TableContainer>
@@ -187,30 +199,32 @@ export const TaskList: FC = () => {
       >
         <EnhancedTableHead
           classes={classes}
-          numSelected={0}
+          numSelected={nSelected}
           orderBy={"name"}
-          rowCount={taskList.length}
+          rowCount={nTotal}
         />
         <TableBody>
-          {taskList.map(r => {
+          {Object.entries(torrents).map(([hash, { info: r, pannel }]) => {
+            const { selected, open } = pannel;
+
             return <>
               <TableRow
                 hover
-                onClick={() => handleCheckboxClick(r.hash)}
+                onClick={() => handleCheckboxClick(hash)}
                 role="checkbox"
                 aria-checked={false}
                 tabIndex={-1}
-                key={r.hash}
-                selected={selectedStatus.get(r.hash) || false}
+                key={hash}
+                selected={selected}
               >
 
                 <TableCell padding="checkbox">
-                  <Checkbox checked={selectedStatus.get(r.hash) || false} inputProps={{ 'aria-labelledby': r.hash }} />
+                  <Checkbox checked={selected} inputProps={{ 'aria-labelledby': hash }} />
                 </TableCell>
 
                 <TableCell>
-                  <IconButton aria-label="expand row" size="small" onClick={() => handleCollapseClick(r.hash)}>
-                    {(openStatus.get(r.hash) || false) ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                  <IconButton aria-label="expand row" size="small" onClick={() => handleCollapseClick(hash)}>
+                    {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
                   </IconButton>
                 </TableCell>
 
@@ -226,7 +240,7 @@ export const TaskList: FC = () => {
 
               <TableRow>
                 <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                  <TrackerList hash={r.hash} open={openStatus.get(r.hash) || false} />
+                  {open && <TrackerList hash={hash} open={open} />}
                 </TableCell>
               </TableRow>
             </>;

@@ -2,10 +2,11 @@ import * as path from "path";
 import { Configuration } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 
-const QB_HOST = "http://localhost:55555";
+const QB_HOST = "http://localhost:12121";
 
 const DEV_SERVER_HOST = "localhost";
-const DEV_SERVER_PORT = 54321;
+const DEV_SERVER_PORT = 8080;
+
 
 const config: Configuration = {
   mode: "development",
@@ -55,5 +56,6 @@ const config: Configuration = {
     }
   }
 };
+
 
 export default config;
