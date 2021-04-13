@@ -8,11 +8,12 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
-import { Menu as MenuIcon } from '@material-ui/icons';
+import MailIcon from '@material-ui/icons/Mail';
+import NotificationsIcon from '@material-ui/icons/Notifications';
 
 import Version from '@src/app/Version';
 import { GlobalReduxState } from '@src/redux';
-import { InputBase } from '@material-ui/core';
+import { Badge, InputBase } from '@material-ui/core';
 
 
 const drawerWidth = 240;
@@ -21,6 +22,7 @@ const useStyles = makeStyles((theme) => ({
   toolbar: {
     paddingRight: 24, // keep right padding when drawer closed
     height: "8px",
+    minHeight: "48px",
   },
   toolbarIcon: {
     display: 'flex',
@@ -34,14 +36,6 @@ const useStyles = makeStyles((theme) => ({
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
-    }),
-  },
-  appBarShift: {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
     }),
   },
   menuButton: {
@@ -90,11 +84,23 @@ const useStyles = makeStyles((theme) => ({
       width: 'auto',
     },
   },
+  sectionDesktop: {
+    display: 'flex',
+    [theme.breakpoints.up('md')]: {
+      display: 'flex',
+    },
+  },
+  sectionMobile: {
+    display: 'flex',
+    [theme.breakpoints.up('md')]: {
+      display: 'none',
+    },
+  },
 }));
 
 
-const AppBarHeader: FC<{ drawerOpen: boolean, handleDrawerOpen: () => any }> = ({ drawerOpen, handleDrawerOpen }) => {
-  const { appBar, search, searchIcon, inputRoot, inputInput, appBarShift, toolbar, menuButton, menuButtonHidden, title } = useStyles();
+const AppBarHeader: FC = () => {
+  const classes = useStyles();
 
   const { apiVersion, appVersion } = useSelector(({ app: { apiVersion, appVersion } }: GlobalReduxState) => ({
     apiVersion,
@@ -102,32 +108,40 @@ const AppBarHeader: FC<{ drawerOpen: boolean, handleDrawerOpen: () => any }> = (
   }));
 
   return <>
-    <AppBar position="absolute" className={clsx(appBar, drawerOpen && appBarShift)}>
-      <Toolbar className={toolbar}>
-        <IconButton
-          edge="start"
-          color="inherit"
-          aria-label="open drawer"
-          onClick={handleDrawerOpen}
-          className={clsx(menuButton, drawerOpen && menuButtonHidden)}
-        >
-          <MenuIcon />
-        </IconButton>
-        <Typography component="h1" variant="h6" color="inherit" noWrap className={title}>
+    <AppBar position="absolute" className={clsx(classes.appBar)}>
+
+      <Toolbar className={classes.toolbar}>
+
+        <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
           Dashboard
-          </Typography>
-        <div className={search}>
-          <div className={searchIcon}>
+        </Typography>
+
+        {/* search bar */}
+        <div className={classes.search}>
+          <div className={classes.searchIcon}>
             <SearchIcon />
           </div>
           <InputBase
             placeholder="Search…"
             classes={{
-              root: inputRoot,
-              input: inputInput,
+              root: classes.inputRoot,
+              input: classes.inputInput,
             }}
             inputProps={{ 'aria-label': 'search' }}
           />
+        </div>
+
+        <div className={classes.sectionDesktop}>
+          <IconButton aria-label="show 4 new mails" color="inherit">
+            <Badge badgeContent={4} color="secondary">
+              <MailIcon />
+            </Badge>
+          </IconButton>
+          <IconButton aria-label="show 17 new notifications" color="inherit">
+            <Badge badgeContent={17} color="secondary">
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
         </div>
 
         <Version appVersion={appVersion} apiVersion={apiVersion} />

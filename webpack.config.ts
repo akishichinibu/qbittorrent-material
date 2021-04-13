@@ -1,11 +1,17 @@
-import * as path from "path";
+// import os from "os";
+import path from "path";
 import { Configuration } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
+
+// var HappyPack = require('happypack');
 
 const QB_HOST = "http://localhost:12121";
 
 const DEV_SERVER_HOST = "localhost";
 const DEV_SERVER_PORT = 8080;
+
+
+// const happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length })
 
 
 const config: Configuration = {
@@ -30,6 +36,11 @@ const config: Configuration = {
   },
   module: {
     rules: [
+      // {
+      //   test: /\.(jsx?|tsx?)$/,
+      //   // exclude: ['./node_modules'],
+      //   use: ['babel-loader']
+      // },
       {
         test: /\.tsx?$/,
         use: "ts-loader",
@@ -40,6 +51,15 @@ const config: Configuration = {
     new HtmlWebpackPlugin({
       template: path.join(process.cwd(), "public", "index.html"),
     }),
+    // new HappyPack({
+    //   id: 'babel',
+    //   loaders: [
+    //     {
+    //       loader: 'babel-loader'
+    //     }
+    //   ],
+    //   threadPool: happyThreadPool
+    // }),
   ],
   devtool: 'source-map',
   devServer: {

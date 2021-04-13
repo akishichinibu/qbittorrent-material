@@ -22,7 +22,7 @@ interface TrackersUpdatedAT extends PayloadAction<ActionLiteral, {
 
 interface PresentTriggerAT extends PayloadAction<ActionLiteral, {
   hash: string;
-  operation: "selected" | "expanded" | "toSelectAll";
+  operation: "selected" | "unselected" | "selectAll";
 }> {
   type: "task/present/trigger";
 }

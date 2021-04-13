@@ -12,17 +12,11 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import { LoginRequestAT } from './redux/action';
 
 
-const LoginModal: FC<{ open: boolean }> = ({ open }) => {
-  const [isOpen, setIsOpen] = useState(open);
-
+const LoginModal: FC = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
   const dispatch = useDispatch<Dispatch<LoginRequestAT>>();
-
-  const handleClose = () => {
-    setIsOpen(false);
-  };
 
   const handleLogin = () => {
     dispatch({ type: "app/login/requested", payload: {
@@ -33,7 +27,7 @@ const LoginModal: FC<{ open: boolean }> = ({ open }) => {
 
   return <>
     <div>
-      <Dialog open={isOpen} onClose={handleClose} aria-labelledby="form-dialog-title">
+      <Dialog open={true} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Login</DialogTitle>
         <DialogContent>
 
@@ -65,9 +59,6 @@ const LoginModal: FC<{ open: boolean }> = ({ open }) => {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
           <Button onClick={handleLogin} color="primary">
             Login
           </Button>

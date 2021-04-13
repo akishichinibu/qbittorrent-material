@@ -38,5 +38,3 @@ export const globalStore = createStore(
 RootSaga.map(s => sagaMiddleware.run(s));
 
 export type GlobalActionType = TaskGAT | AppGAT;
-
-globalStore.subscribe(() => console.log(globalStore.getState()));

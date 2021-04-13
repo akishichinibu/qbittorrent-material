@@ -1,26 +1,27 @@
 import { QBTorrentInfo, QBTrackerInfo } from "@src/common/task";
 
 
-interface PannelStatus {
-  open: boolean;
-  selected: boolean;
-}
-
-
 export interface TorrentStatus {
   info: QBTorrentInfo;
   trackers: Array<QBTrackerInfo>;
-  pannel: PannelStatus;
 }
 
 
 export interface TaskStateType {
+  currentSelected: string | null;
   torrents: {
     [key: string]: TorrentStatus;
   };
 }
 
 
+export const voidTorrentStatus: TorrentStatus = {
+  info: {} as QBTorrentInfo,
+  trackers: [],
+}
+
+
 export const initState: TaskStateType = {
+  currentSelected: null,
   torrents: {},
 }

@@ -15,7 +15,6 @@ export const reducer = (state = initState, action: TaskGAT) => {
         const data: TorrentStatus = {
           info: r,
           trackers: prev?.trackers || [],
-          pannel: prev?.pannel || { open: false, selected: false }
         }
 
         return [r.hash, data];
@@ -29,27 +28,9 @@ export const reducer = (state = initState, action: TaskGAT) => {
     case "task/present/trigger": {
       action = action as PresentTriggerAT;
       const { hash, operation } = action.payload;
-      const currentTorrents = Object.assign({}, state.torrents);
-
-      switch (operation) {
-        case "expanded": {
-          const s = currentTorrents[hash]!;
-          s.pannel.open = !s.pannel.open;
-          break;
-        }
-        case "selected": {
-          const s = currentTorrents[hash]!;
-          s.pannel.selected = !s.pannel.selected;
-          break;
-        }
-        case "toSelectAll": {
-          Object.entries(currentTorrents).forEach(([hash, r]) => r.pannel.selected = true);
-          break;
-        }
-      }
       return {
         ...state,
-        torrents: currentTorrents,
+        currentSelected: operation === "selected" ? hash : null,
       }
     }
     default: {
