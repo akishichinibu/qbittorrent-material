@@ -60,7 +60,7 @@ const DashBoard: FC = () => {
   return <>
     <div className={classes.root}>
       <CssBaseline />
-      <AppBarHeader/>
+      <AppBarHeader />
 
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
@@ -69,9 +69,9 @@ const DashBoard: FC = () => {
 
             <Grid item xs={12} md={12} lg={12}>
               <ButtonGroup variant="contained" color="primary" aria-label="contained primary button group">
-                <Button onClick={() => setAddingLinkTask(true)}><InsertLinkIcon/></Button>
-                <Button><CreateNewFolderIcon/></Button>
-                <Button><SettingsIcon/></Button>
+                <Button onClick={() => setAddingLinkTask(true)}><InsertLinkIcon /></Button>
+                <Button><CreateNewFolderIcon /></Button>
+                <Button><SettingsIcon /></Button>
               </ButtonGroup>
             </Grid>
 
@@ -92,10 +92,46 @@ const DashBoard: FC = () => {
       </main>
     </div>
 
-    { !hasLogin && <LoginModal/> }
-    <AddTaskFromLinkModal open={addingLinkTask} handleClose={() => setAddingLinkTask(false)}/>
+    { !hasLogin && <LoginModal />}
+    <AddTaskFromLinkModal open={addingLinkTask} handleClose={() => setAddingLinkTask(false)} />
   </>
 }
 
 
-export default DashBoard;
+import styles from './Dashboard.module.less';
+
+
+import { Layout, Menu, Breadcrumb } from 'antd';
+const { Header, Content, Footer } = Layout;
+
+const DashBoard2: FC = () => {
+  return <>
+    <Layout>
+
+      <Header className={styles.header}>
+        <div className="logo" />
+        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']}>
+          <Menu.Item key="1">nav 1</Menu.Item>
+        </Menu>
+      </Header>
+
+      <Content className="site-layout" style={{ padding: '0 50px', marginTop: 64 }}>
+        <Breadcrumb style={{ margin: '16px 0' }}>
+          <Breadcrumb.Item>Home</Breadcrumb.Item>
+          <Breadcrumb.Item>List</Breadcrumb.Item>
+          <Breadcrumb.Item>App</Breadcrumb.Item>
+        </Breadcrumb>
+        <div className="site-layout-background" style={{ padding: 24, minHeight: 380 }}>
+          <TaskList></TaskList>
+        </div>
+        <div className="site-layout-background" style={{ padding: 24, minHeight: 380 }}>
+          <DetailInfoPanel></DetailInfoPanel>
+        </div>
+      </Content>
+
+      <Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer>
+    </Layout>,
+  </>
+}
+
+export default DashBoard2;

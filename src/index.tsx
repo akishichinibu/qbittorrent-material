@@ -1,18 +1,9 @@
-import React, { Dispatch, FC, useCallback } from "react";
+import React, { FC } from "react";
 import ReactDOM from "react-dom";
-import { Provider, useDispatch } from "react-redux";
-import { torrentsList } from "./api/task";
+import { Provider } from "react-redux";
 
-import DashBoard from "./page/Dashboard";
-import { GlobalActionType, globalStore } from "./redux";
-import { useInterval } from "./utils";
-
-
-const Main: FC = () => {
-  return <>
-    <DashBoard></DashBoard>
-  </>
-}
+import Main from "./Main";
+import { globalStore } from "./redux";
 
 
 const ReduxMain: FC = () => {

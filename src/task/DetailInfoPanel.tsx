@@ -13,53 +13,19 @@ interface TabPanelProps {
 }
 
 
-const TabPanel: FC<TabPanelProps> = (props) => {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box p={1}>{children}</Box>}
-    </div>
-  );
+interface DetailInfo {
+  label: string;
+  value: string;
 }
 
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    flexGrow: 1,
-    backgroundColor: theme.palette.background.paper,
-    padding: "8px",
-  },
-  tab: {
-    maxHeight: "30px",
-  }
-}));
-
-
-function a11yProps(index: number) {
-  return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
-  };
-}
-
-
-const TabsHeader = [
-  "基本信息",
-  "Trackers",
-  "Item Three",
-]
+import { PageHeader, Tag, Button, Statistic, Descriptions, Row } from 'antd';
+import { fileSizePretties } from "@src/utils";
 
 
 const DetailInfoPanel: FC = () => {
-  const classes = useStyles();
   const [value, setValue] = React.useState(0);
+
   const { currentSelected, torrents } = useSelector(({ task: { currentSelected, torrents } }: GlobalReduxState) => ({
     currentSelected,
     torrents,
@@ -71,20 +37,45 @@ const DetailInfoPanel: FC = () => {
 
   const currentInfo = currentSelected === null ? null : torrents[currentSelected]!;
 
-  return <>
-    <div className={classes.root}>
-      <AppBar position="static">
-        <Tabs value={value} onChange={handleChange} aria-label="simple tabs example" className={classes.tab}>
-          {TabsHeader.map((label, index) => <Tab label={label} {...a11yProps(index)} />)}
-        </Tabs>
-      </AppBar>
+  const summaryInfo = currentInfo === null ? null : [
+    ["Status", currentInfo.info.state],
+    ["Size", fileSizePretties(currentInfo.info.size)],
+    ["Ratio", currentInfo.info.ratio],
+    ["种子", currentInfo.info.num_seeds],
+    ["用户", currentInfo.info.num_leechs],
+  ]
 
-      {[BasicInfoTab, TrackersTab, TrackersTab].map((CP, index) => <>
-        <TabPanel value={value} index={index}>
-          {currentInfo && value === index && <CP {...currentInfo} />}
-        </TabPanel>
-      </>)}
-    </div>
+  const detailInfo = currentInfo === null ? null : [
+    ["Time Active", currentInfo.info.time_active],
+    ["Downloaded", currentInfo.info.downloaded],
+    ["Added On", currentInfo.info.added_on],
+    ["Save Path", currentInfo.info.save_path],
+  ]
+
+  return <>
+    <PageHeader
+      className="site-page-header"
+      onBack={() => window.history.back()}
+      title="Title"
+      subTitle="This is a subtitle"
+      extra={[
+        <Button key="3">Operation</Button>,
+        <Button key="2">Operation</Button>,
+        <Button key="1" type="primary">
+          Primary
+      </Button>,
+      ]}
+    >
+      <Row>
+        {summaryInfo && summaryInfo.map(([label, r]) => <Statistic title={label} value={r} />)}
+      </Row>
+      <br />
+      <Descriptions size="small" column={3}>
+        {detailInfo && detailInfo.map(([label, value]) => <Descriptions.Item label={label}>{value}</Descriptions.Item>)}
+      </Descriptions>
+
+      <TrackersTab />
+    </PageHeader>
   </>;
 }
 

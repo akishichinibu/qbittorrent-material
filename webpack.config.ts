@@ -36,14 +36,17 @@ const config: Configuration = {
   },
   module: {
     rules: [
-      // {
-      //   test: /\.(jsx?|tsx?)$/,
-      //   // exclude: ['./node_modules'],
-      //   use: ['babel-loader']
-      // },
       {
         test: /\.tsx?$/,
         use: "ts-loader",
+      },
+      {
+        test: /\.less$/i,
+        use: [
+          "style-loader",
+          "css-loader",
+          "less-loader",
+        ],
       },
     ],
   },
